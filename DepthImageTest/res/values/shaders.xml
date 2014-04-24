@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="fragment_shader">
+        
+        precision highp float; 
+        
+        uniform sampler2D uColourTexture;
+        uniform sampler2D uDepthTexture;
+        uniform vec2 uSkew;
+        varying vec2 vTexCoordinate;
+        
+        void main() {
+          vec2 scale = vec2(0.05, 0.05);
+          float depth = texture2D(uDepthTexture, vTexCoordinate).r * -1.0 + 0.5;
+          vec2 coordAdjust = uSkew * vec2(1.0, -1.0) * depth * scale;
+          gl_FragColor = texture2D(uColourTexture, vTexCoordinate + coordAdjust);
+        }</string>
+    <string name="fragment_shader_blur">
+        
+        precision highp float; 
+        
+        uniform sampler2D uColourTexture;
+        uniform sampler2D uDepthTexture;
+        uniform vec2 uSkew;
+        varying vec2 vTexCoordinate;
+        
+        void main() {
+          vec2 scale = vec2(0.02, 0.02);
+          
+          /* depth 0.0 (far) 1.0 near */ 
+          float depth = 1.0 - texture2D(uDepthTexture, vTexCoordinate).r;
+          
+          /* depth -1 to 1 */
+          float depthZero = (depth - 0.5) * 2.0;
+          
+          vec2 coordAdjust = uSkew * vec2(1.0, -1.0) * depthZero * scale;
+          vec2 colourCoord = vTexCoordinate + coordAdjust;
+          
+          float blurSpread = 0.005; /* uvws */
+          float blurScaled = abs(depthZero) * blurSpread;
+          float blurWeight = 0.2;
+          float mainWeight = 1.0 - (blurWeight * 4.0);
+          
+          vec4 mainColour = texture2D(uColourTexture, colourCoord) * mainWeight;
+          vec4 leftColour = texture2D(uColourTexture, colourCoord + vec2(-blurScaled, 0)) * blurWeight;
+          vec4 rightColour = texture2D(uColourTexture, colourCoord + vec2(blurScaled, 0)) * blurWeight;
+          vec4 topColour = texture2D(uColourTexture, colourCoord + vec2(0, blurScaled)) * blurWeight;
+          vec4 bottomColour = texture2D(uColourTexture, colourCoord + vec2(0, -blurScaled)) * blurWeight;
+          
+          vec4 colour = mainColour + leftColour + rightColour + topColour + bottomColour;
+          gl_FragColor = vec4(colour.rgb, 1.0);
+          
+          /* 
+          gl_FragColor = vec4(blurScaled, blurScaled, blurScaled, 1.0);
+          gl_FragColor = texture2D(uColourTexture, vTexCoordinate + coordAdjust);
+          */
+        }
+</string>
+    <string name="vertex_shader">
+        attribute vec2 aTexCoordinate;
+        attribute vec3 aVertexPosition;
+        uniform mat4 uMVPMatrix;
+        
+        varying vec2 vTexCoordinate;
+
+        void main() {
+            vTexCoordinate = aTexCoordinate;
+            gl_Position = uMVPMatrix * vec4(aVertexPosition, 1.0);
+        }</string>
+
+</resources>

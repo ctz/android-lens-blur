@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Lens Blur Viewer</string>
+    <string name="action_settings">Settings</string>
+    
+    <string name="open_prompt">Choose an image taken with Lens Blur</string>
+    
+    <string name="no_depth_info_title">Error</string>
+    <string name="no_depth_info">No depth information found in image.</string>
+    <string name="no_depth_info_cancel">Cancel</string>
+    <string name="no_depth_info_choose">Choose again</string>
+    
+
+</resources>
